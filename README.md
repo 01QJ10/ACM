@@ -4,7 +4,7 @@
 This repository implements a quantum autoencoder that encodes a qutrit into a qubit, applies the Buzek-Hillery cloning protocol to the qubit, and decodes it back to a qutrit. The objective is to explore whether operating in a lower-dimensional space can enhance cloning fidelity.
 
 ## Repository Structure
-
+```
 quantum-autoencoder/
 ├── Code/
 │   ├── encoder.py         # Implements the qutrit-to-qubit encoding via a unitary transformation
@@ -22,3 +22,4 @@ quantum-autoencoder/
 │   └── test_loss.py       # Unit tests for the loss function module
 └── Examples/
     └── run_example.py     # Example script demonstrating the overall process
+```
