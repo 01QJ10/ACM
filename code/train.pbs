@@ -1,0 +1,51 @@
+#!/bin/bash
+#PBS -j oe                  
+#PBS -k oed               
+#PBS -N train              
+# This is a comment PBS -l select=1:ncpus=36:ngpus=1:mem=250gb 
+#PBS -l select=1:ncpus=72:mpiprocs=1:ompthreads=72:ngpus=2
+#PBS -l walltime=05:00:00    
+
+cd $PBS_O_WORKDIR
+
+# Load Singularity module
+module load singularity
+
+# Define the Singularity container
+image="/app1/common/singularity-img/hopper/pytorch/pytorch_2.4.0a0-cuda_12.5.0_ngc_24.06.sif"
+
+# Run commands inside Singularity
+singularity exec $image bash << 'EOF' > stdout.$PBS_JOBID 2> stderr.$PBS_JOBID
+
+echo "Running job in $PBS_O_WORKDIR"
+
+# Add ~/.local/bin to PATH and ensure user installs are found
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.10/site-packages:$PYTHONPATH
+
+# Ensure pip is installed
+if ! command -v pip &> /dev/null; then
+    echo "pip not found, installing..."
+    python -m ensurepip --default-pip || apt-get install python3-pip -y
+fi
+
+# Upgrade pip
+pip install --upgrade pip --user
+
+# Force install a compatible NumPy version before other dependencies
+pip install --user "numpy<2.0"
+
+# Locate the requirements.txt file (parent directory)
+REQ_FILE="$PBS_O_WORKDIR/requirements.txt"
+
+# Check if requirements.txt exists before installing
+if [ -f "$REQ_FILE" ]; then
+    echo "Installing dependencies from $REQ_FILE"
+    pip install --user -r "$REQ_FILE"
+else
+    echo "ERROR: requirements.txt not found at $REQ_FILE"
+    exit 1
+fi
+
+# Run the main script
+python main2.py

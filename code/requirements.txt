@@ -1,0 +1,9 @@
+numpy<2.0  # Force downgrade to avoid incompatibility issues
+jax[cuda12]
+jaxlib
+flax
+optax
+matplotlib
+pandas
+torch
+scikit-learn

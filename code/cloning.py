@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
-from code.loss import fidelity
+from loss import fidelity
 def orthogonal_state(psi):
     """
     Given a 2-dimensional normalized state psi, returns an orthogonal normalized state psi_perp.
@@ -68,3 +68,4 @@ def buzek_hillery_clone(effective_psi):
     # print(fidelity(psi, rho_B))
     
     return rho_AB, rho_A, rho_B
+
