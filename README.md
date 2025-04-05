@@ -85,3 +85,7 @@ For further details and configuration options, please refer to the individual mo
 
 Happy cloning and encoding!
 
+**Citation:**
+If you use this code in your work, please cite it as follows:
+[![DOI](https://zenodo.org/badge/937020597.svg)](https://doi.org/10.5281/zenodo.15087282)
+
