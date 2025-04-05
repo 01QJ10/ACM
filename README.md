@@ -8,6 +8,7 @@ The implementation leverages JAX for numerical computations, NumPy for data hand
 
 ## Repository Structure
 
+```bash
 ACM/
 ├── code/
 │   ├── embed.py                 # Embeds a 4x4 density matrix into a 9x9 matrix (two qutrits)
@@ -29,6 +30,7 @@ ACM/
 │   └── test_loss.py             # Unit tests for the loss function module
 ├── data/                        # Input data files (e.g., qutrit state datasets)
 └── .gitignore                   # Git ignore file to exclude unnecessary files
+```
 
 ## Quick Start
 
@@ -55,19 +57,19 @@ ACM/
    ```
 
 3.	Training:
-	•	Locally:
-    Run main.py or main2.py to start the training process with your chosen configuration.
+	- **Locally:** 
+    Run `main.py` or `main2.py` to start the training process with your chosen configuration.
     ```bash
     python code/main.py
     ```
 
-	•	On an HPC System:
-    Submit the provided job script (Code/train.pbs) or create a custom job script to run one of the training scripts.
+	- **On an HPC System:** 
+    Submit the provided job script (`code/train.pbs`) or create a custom job script to run one of the training scripts.
 
 4.	Evaluation and Plotting:
-    After training, review the generated results in the results/ directory. Use plot.py to visualize training metrics:
+    After training, review the generated results in the `results/` directory. Use `plot.py` to visualize training metrics:
     ```bash
-    python Code/plot.py
+    python code/plot.py
     ```
 
 
