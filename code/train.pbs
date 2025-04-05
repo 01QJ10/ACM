@@ -48,4 +48,4 @@ else
 fi
 
 # Run the main script
-python main2.py
+python plot.py

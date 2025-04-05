@@ -243,89 +243,172 @@ import matplotlib.pyplot as plt
 #     plt.show()
 #     plt.close(fig)
 
+# import numpy as np
+# import matplotlib.pyplot as plt
+# from torch.utils.data import Dataset, DataLoader
+
+# seed_ls = [1, 2, 3, 4]
+# p_list = np.arange(0.01, 0.51, 0.01)
+
+# # Define the three colours and markers to use for the three plots.
+# colors = ['#bc5090', '#e5c185', '#b8cdab']  # Total Loss, Cloning Loss, Average Fidelity
+# markers = ['^', 's', 'o']
+
+# for seed in seed_ls:
+#     # Initialize lists for each metric.
+#     loss_mean_ls = []
+#     loss_err_ls = []
+#     clone_loss_mean_ls = []
+#     clone_loss_err_ls = []
+#     FA_mean_ls = []
+#     FA_err_ls = []
+#     FB_mean_ls = []
+#     FB_err_ls = []
+    
+#     # Loop over p values
+#     for count, p in enumerate(p_list):
+#         if count < 9:
+#             name = f"p_0_0{int(p * 100)}"
+#         else:
+#             name = f"p_0_{int(p * 100)}"
+        
+#         # Load results for this seed and p
+#         filepath = f"../results/check_trial{seed}_noise/{name}_results.npy"
+#         results = np.load(filepath, allow_pickle=True).item()
+        
+#         # Find the matching data by p-value
+#         for key, data in results.items():
+#             # Compare rounded values to avoid floating-point mismatch
+#             if round(key[0], 2) == round(p, 2):
+#                 # Extract the last 100 values for each metric.
+#                 l = data["loss_history"][-100:]
+#                 c = data["cloning_loss_history"][-100:]
+#                 fA = data["FA_history"][-100:]
+#                 fB = data["FB_history"][-100:]
+#                 print(f"Seed = {seed}, Found data for p = {p}: length of loss = {len(l)}")
+                
+#                 # Compute means & standard errors.
+#                 loss_mean_ls.append(np.mean(l))
+#                 loss_err_ls.append(np.std(l) / np.sqrt(len(l)))
+#                 clone_loss_mean_ls.append(np.mean(c))
+#                 clone_loss_err_ls.append(np.std(c) / np.sqrt(len(c)))
+#                 FA_mean_ls.append(np.mean(fA))
+#                 FA_err_ls.append(np.std(fA) / np.sqrt(len(fA)))
+#                 FB_mean_ls.append(np.mean(fB))
+#                 FB_err_ls.append(np.std(fB) / np.sqrt(len(fB)))
+#                 break
+
+#     # Compute the overall (average) fidelity as the average of F_A and F_B.
+#     avg_fid_mean_ls = (np.array(FA_mean_ls) + np.array(FB_mean_ls)) / 2
+#     avg_fid_err_ls = (np.array(FA_err_ls) + np.array(FB_err_ls)) / 2
+
+#     # Create a figure with 3 rows (Total Loss, Cloning Loss, and Average Fidelity)
+#     fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
+    
+#     # Plot Total Loss.
+#     axs[0].scatter(p_list, loss_mean_ls, color=colors[0], s=15, marker=markers[0], label="Total Loss")
+#     axs[0].plot(p_list, loss_mean_ls, color=colors[0])
+#     axs[0].set_title(f"Total Loss vs $\\epsilon$ (seed={seed})", fontsize=16)
+#     axs[0].set_ylabel("Total Loss", fontsize=14)
+#     axs[0].legend(fontsize=14)
+#     axs[0].grid(alpha=0.15)
+    
+#     # Plot Cloning Loss.
+#     axs[1].scatter(p_list, clone_loss_mean_ls, color=colors[1], s=15, marker=markers[1], label="Cloning Loss")
+#     axs[1].plot(p_list, clone_loss_mean_ls, color=colors[1])
+#     axs[1].set_title("Cloning Loss vs $\\epsilon$", fontsize=16)
+#     axs[1].set_ylabel("Cloning Loss", fontsize=14)
+#     axs[1].legend(fontsize=14)
+#     axs[1].grid(alpha=0.15)
+    
+#     # Plot Average Fidelity.
+#     axs[2].scatter(p_list, avg_fid_mean_ls, color=colors[2], s=15, marker=markers[2], label="$\\langle F \\rangle$")
+#     axs[2].plot(p_list, avg_fid_mean_ls, color=colors[2])
+#     axs[2].set_title("Average Fidelity $\\langle F \\rangle$ vs $\\epsilon$", fontsize=16)
+#     axs[2].set_ylabel("$\\langle F \\rangle$", fontsize=14)
+#     axs[2].set_xlabel("$\\epsilon$", fontsize=14)
+#     axs[2].legend(fontsize=14)
+#     axs[2].grid(alpha=0.15)
+    
+#     plt.tight_layout()
+#     out_fig = f"../results/check_trial{seed}_noise/plot{seed}.png"
+#     plt.savefig(out_fig)
+#     plt.show()
+#     plt.close(fig)
+
+
 import numpy as np
 import matplotlib.pyplot as plt
-from torch.utils.data import Dataset, DataLoader
 
-seed_ls = [1, 2, 3, 4]
-p_list = np.arange(0.01, 0.51, 0.01)
+# Plot for seeds 5 and 6.
+seed_ls = [5, 6]
 
-# Define the three colours and markers to use for the three plots.
-colors = ['#bc5090', '#e5c185', '#b8cdab']  # Total Loss, Cloning Loss, Average Fidelity
-markers = ['^', 's', 'o']
+# Theoretical UQCM fidelities:
+uqcm_qubit = 5/6  
+uqcm_qutrit = 0.75
 
 for seed in seed_ls:
-    # Initialize lists for each metric.
-    loss_mean_ls = []
-    loss_err_ls = []
-    clone_loss_mean_ls = []
-    clone_loss_err_ls = []
-    FA_mean_ls = []
-    FA_err_ls = []
-    FB_mean_ls = []
-    FB_err_ls = []
+    # Load the main results file for the given seed.
+    results_path = f"../results/check_trial{seed}_noise/hyperparams_results.npy"
+    results = np.load(results_path, allow_pickle=True).item()
     
-    # Loop over p values
-    for count, p in enumerate(p_list):
-        if count < 9:
-            name = f"p_0_0{int(p * 100)}"
-        else:
-            name = f"p_0_{int(p * 100)}"
+    # Filter keys for β = 8.0 and lr = 0.01.
+    filtered_keys = [key for key in results.keys() if key[1] == 8.0 and key[2] == 0.01]
+    # Sort keys by the p-value.
+    filtered_keys = sorted(filtered_keys, key=lambda k: k[0])
+    p_list = [key[0] for key in filtered_keys]
+    
+    total_fid_mean_ls = []
+    f_cl_rho_ls = []
+    f_cl_rho0_ls = []
+    
+    # Loop over the filtered keys to extract metrics.
+    for key in filtered_keys:
+        data = results[key]
+        # For Total Fidelity, use the FA_history (F_A fidelity) as our proxy.
+        FA_hist = data["FA_history"]
+        last_FA = FA_hist[-100:] if len(FA_hist) >= 100 else FA_hist
+        total_fid_mean_ls.append(np.mean(last_FA))
         
-        # Load results for this seed and p
-        filepath = f"../results/check_trial{seed}_noise/{name}_results.npy"
-        results = np.load(filepath, allow_pickle=True).item()
-        
-        # Find the matching data by p-value
-        for key, data in results.items():
-            # Compare rounded values to avoid floating-point mismatch
-            if round(key[0], 2) == round(p, 2):
-                # Extract the last 100 values for each metric.
-                l = data["loss_history"][-100:]
-                c = data["cloning_loss_history"][-100:]
-                fA = data["FA_history"][-100:]
-                fB = data["FB_history"][-100:]
-                print(f"Seed = {seed}, Found data for p = {p}: length of loss = {len(l)}")
-                
-                # Compute means & standard errors.
-                loss_mean_ls.append(np.mean(l))
-                loss_err_ls.append(np.std(l) / np.sqrt(len(l)))
-                clone_loss_mean_ls.append(np.mean(c))
-                clone_loss_err_ls.append(np.std(c) / np.sqrt(len(c)))
-                FA_mean_ls.append(np.mean(fA))
-                FA_err_ls.append(np.std(fA) / np.sqrt(len(fA)))
-                FB_mean_ls.append(np.mean(fB))
-                FB_err_ls.append(np.std(fB) / np.sqrt(len(fB)))
-                break
-
-    # Compute the overall (average) fidelity as the average of F_A and F_B.
-    avg_fid_mean_ls = (np.array(FA_mean_ls) + np.array(FB_mean_ls)) / 2
-    avg_fid_err_ls = (np.array(FA_err_ls) + np.array(FB_err_ls)) / 2
-
-    # Create a figure with 3 rows (Total Loss, Cloning Loss, and Average Fidelity)
+        # Extract F_cl_rho and F_cl_rho0.
+        f_cl_rho_ls.append(data["F_cl_rho"])
+        f_cl_rho0_ls.append(data["F_cl_rho0"])
+    
+    # Define colours and markers for the three plots.
+    colors = ['#bc5090', '#e5c185', '#b8cdab']  # For Total Fidelity, F_cl_rho, F_cl_rho0.
+    markers = ['^', 's', 'o']
+    
+    # Create a figure with 3 subplots (one per metric).
     fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
     
-    # Plot Total Loss.
-    axs[0].scatter(p_list, loss_mean_ls, color=colors[0], s=15, marker=markers[0], label="Total Loss")
-    axs[0].plot(p_list, loss_mean_ls, color=colors[0])
-    axs[0].set_title(f"Total Loss vs $\\epsilon$ (seed={seed})", fontsize=16)
-    axs[0].set_ylabel("Total Loss", fontsize=14)
+    # Plot Total Fidelity (interpreted as F_A) with horizontal dashed lines for reference.
+    axs[0].plot(p_list, total_fid_mean_ls, 
+                    f"{markers[0]}-", color=colors[0],
+                    markersize=6, label="$F_{overall}$")
+    axs[0].axhline(uqcm_qubit, color='k', linestyle='-.', label="UQCM Qubit")
+    axs[0].axhline(uqcm_qutrit, color='gray', linestyle='--', label="UQCM Qutrit")
+    axs[0].set_title("$F_{overall}$ vs $\\epsilon$" + f"(seed={seed})", fontsize=16)
+    axs[0].set_ylabel("$F_{overall}$", fontsize=14)
     axs[0].legend(fontsize=14)
     axs[0].grid(alpha=0.15)
     
-    # Plot Cloning Loss.
-    axs[1].scatter(p_list, clone_loss_mean_ls, color=colors[1], s=15, marker=markers[1], label="Cloning Loss")
-    axs[1].plot(p_list, clone_loss_mean_ls, color=colors[1])
-    axs[1].set_title("Cloning Loss vs $\\epsilon$", fontsize=16)
-    axs[1].set_ylabel("Cloning Loss", fontsize=14)
+    # Plot F_cl(ρ) with reference lines.
+    axs[1].plot(p_list, f_cl_rho_ls, f"{markers[1]}-",
+                color=colors[1], markersize=6, label="$F_{qubit}$")
+    axs[1].axhline(uqcm_qubit, color='k', linestyle='-.', label="UQCM Qubit")
+    axs[1].axhline(uqcm_qutrit, color='gray', linestyle='--', label="UQCM Qutrit")
+    axs[1].set_title("$F_{qubit}$ vs $\\epsilon$", fontsize=16)
+    axs[1].set_ylabel("$F_{qubit}$", fontsize=14)
     axs[1].legend(fontsize=14)
     axs[1].grid(alpha=0.15)
     
-    # Plot Average Fidelity.
-    axs[2].scatter(p_list, avg_fid_mean_ls, color=colors[2], s=15, marker=markers[2], label="$\\langle F \\rangle$")
-    axs[2].plot(p_list, avg_fid_mean_ls, color=colors[2])
-    axs[2].set_title("Average Fidelity $\\langle F \\rangle$ vs $\\epsilon$", fontsize=16)
-    axs[2].set_ylabel("$\\langle F \\rangle$", fontsize=14)
+    # Plot F_cl(|0><0|) with reference lines.
+    axs[2].plot(p_list, f_cl_rho0_ls, f"{markers[2]}-",
+                color=colors[2], markersize=6, label="$F_{qutrit}$")
+    axs[2].axhline(uqcm_qubit, color='k', linestyle='-.', label="UQCM Qubit")
+    axs[2].axhline(uqcm_qutrit, color='gray', linestyle='--', label="UQCM Qutrit")
+    axs[2].set_title("$F_{qutrit}$ vs $\\epsilon$", fontsize=16)
+    axs[2].set_ylabel("$F_{qutrit}$", fontsize=14)
     axs[2].set_xlabel("$\\epsilon$", fontsize=14)
     axs[2].legend(fontsize=14)
     axs[2].grid(alpha=0.15)
