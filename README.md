@@ -87,5 +87,6 @@ Happy cloning and encoding!
 
 **Citation:**
 If you use this code in your work, please cite it as follows:
-[![DOI](https://zenodo.org/badge/937020597.svg)](https://doi.org/10.5281/zenodo.15087282)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15160624.svg)](https://doi.org/10.5281/zenodo.15160624)
+
 
