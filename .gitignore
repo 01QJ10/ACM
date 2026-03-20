@@ -1,0 +1,14 @@
+# macOS files
+.DS_Store
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Generated experiment artifacts
+results/
+noise/
