@@ -1,4 +1,7 @@
 import os
+import argparse
+from pathlib import Path
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -12,9 +15,12 @@ from loss import fidelity
 from decoder import decode_qubit_to_qutrit
 from embed import embed
 
-seed = 5
-np.random.seed(seed)
-torch.manual_seed(seed)
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_SEED = 6
+
+
+def p_to_name(p: float) -> str:
+    return f"p_0_{int(round(p, 2) * 100):02d}"
 
 class QutritDataset(Dataset):
     """
@@ -158,22 +164,26 @@ def train(dataloader, ref_state, num_epochs: int = 200, learning_rate: float = 0
     print("Final weights:", final_weights)
     return final_weights, loss_history, cloning_loss_history, FA_history, FB_history, F_cl_rho, F_cl_rho0
 
-def main():
+def main(seed: int = DEFAULT_SEED, noise_root: Path | None = None, output_root: Path | None = None,
+         p_min: float = 0.01, p_max: float = 1.00, p_step: float = 0.01,
+         num_epochs: int = 300, batch_size: int = 100):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    noise_root = noise_root or (REPO_ROOT / "noise" / "check")
+    output_root = output_root or (REPO_ROOT / "results")
     trial = f"check_trial{seed}_noise"
-    trial_dir = f"../results/{trial}"
+    trial_dir = output_root / trial
     os.makedirs(trial_dir, exist_ok=True)
     
-    p_list = np.arange(0.01, 1.01, 0.01)
+    p_list = np.arange(p_min, p_max + 0.5 * p_step, p_step)
     beta_list = [8.0]
     lr_list = [0.01]
-    num_epochs = 300
-    batch_size = 100
     hyperparams_results = {}
 
     for count, p in enumerate(p_list):
-        name = f"p_0_{int(p * 100):02d}" if p < 0.1 else f"p_0_{int(p * 100)}"
+        name = p_to_name(p)
         print(f"Processing: p = {p}, name = {name}")
-        dataset = QutritDataset(f"../noise/check/{seed}/{name}.txt")
+        dataset = QutritDataset(noise_root / str(seed) / f"{name}.txt")
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         ref_state = dataset[0]
         for beta in beta_list:
@@ -192,7 +202,18 @@ def main():
                     "F_cl_rho0": float(F_cl_rho0),
                     "F_approx": float(F_approx)
                 }
-        np.save(f"{trial_dir}/hyperparams_results.npy", hyperparams_results)
+        np.save(trial_dir / "hyperparams_results.npy", hyperparams_results)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run the noise sweep training pipeline.")
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--noise-root", type=Path, default=None)
+    parser.add_argument("--output-root", type=Path, default=None)
+    parser.add_argument("--p-min", type=float, default=0.01)
+    parser.add_argument("--p-max", type=float, default=1.00)
+    parser.add_argument("--p-step", type=float, default=0.01)
+    parser.add_argument("--num-epochs", type=int, default=300)
+    parser.add_argument("--batch-size", type=int, default=100)
+    args = parser.parse_args()
+    main(args.seed, args.noise_root, args.output_root, args.p_min, args.p_max, args.p_step,
+         args.num_epochs, args.batch_size)

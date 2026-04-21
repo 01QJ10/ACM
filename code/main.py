@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -11,6 +13,8 @@ from cloning import buzek_hillery_clone  # Performs the cloning transformation.
 from loss import fidelity                # Computes fidelity ⟨ψ|ρ|ψ⟩.
 from decoder import decode_qubit_to_qutrit# Decodes a qubit state to a qutrit state.
 from embed import embed                  # Embeds a qubit state into a qutrit space.
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 # Set random seeds for reproducibility.
 seed = 42
@@ -142,7 +146,7 @@ def train(dataloader, num_epochs: int = 200, learning_rate: float = 0.01, beta: 
 
 def main():
     trial = "trial1"
-    trial_dir = f"../results/{trial}"
+    trial_dir = REPO_ROOT / "results" / trial
     os.makedirs(trial_dir, exist_ok=True)
     
     # Hyperparameters.
@@ -155,7 +159,7 @@ def main():
     hyperparams_results = {}
     for chi in chi_list:
         chi_str = str(int(chi * 100))
-        dataset = QutritDataset(f"../data/pseudo_train_{chi_str}.txt")
+        dataset = QutritDataset(REPO_ROOT / "data" / f"pseudo_train_{chi_str}.txt")
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         for beta in beta_list:
             for lr in lr_list:
@@ -165,7 +169,7 @@ def main():
                 )
                 ref_state = dataset[0]
                 _, encoder_unitary = encode_qutrit(ref_state, weights)
-                with open(f"{trial_dir}/U_chi_{chi}_beta_{beta}_lr_{lr}.txt", "w") as f:
+                with open(trial_dir / f"U_chi_{chi}_beta_{beta}_lr_{lr}.txt", "w") as f:
                     f.write(np.array2string(np.array(encoder_unitary), precision=6, separator=", "))
                 plt.figure(figsize=(8, 6))
                 plt.plot(loss_hist, label="Total Loss")
@@ -173,9 +177,9 @@ def main():
                 plt.xlabel("Epoch")
                 plt.ylabel("Average Loss")
                 plt.legend()
-                plt.title(f"Training Loss, β = {beta}, lr = {lr}, χ = {chi}")
+                plt.title(f"Training Loss, β = {beta}, lr = {lr}, χ ≥ {chi}")
                 plt.grid(alpha=0.35)
-                plt.savefig(f"{trial_dir}/loss_chi_{chi}_beta_{beta}_lr_{lr}.png")
+                plt.savefig(trial_dir / f"loss_chi_{chi}_beta_{beta}_lr_{lr}.png")
                 plt.close()
                 plt.figure(figsize=(8, 6))
                 plt.plot(FA_hist, label="F_A")
@@ -183,9 +187,9 @@ def main():
                 plt.xlabel("Epoch")
                 plt.ylabel("Average Fidelity")
                 plt.legend()
-                plt.title(f"Average Fidelities, β = {beta}, lr = {lr}, χ = {chi}")
+                plt.title(f"Average Fidelities, β = {beta}, lr = {lr}, χ ≥ {chi}")
                 plt.grid(alpha=0.35)
-                plt.savefig(f"{trial_dir}/fidelity_chi_{chi}_beta_{beta}_lr_{lr}.png")
+                plt.savefig(trial_dir / f"fidelity_chi_{chi}_beta_{beta}_lr_{lr}.png")
                 plt.close()
                 hyperparams_results[(chi, beta, lr)] = {
                     "loss_history": loss_hist,
@@ -193,7 +197,7 @@ def main():
                     "FA_history": FA_hist,
                     "FB_history": FB_hist
                 }
-    np.save(f"{trial_dir}/hyperparams_results.npy", hyperparams_results)
+    np.save(trial_dir / "hyperparams_results.npy", hyperparams_results)
 
 if __name__ == "__main__":
     main()

@@ -1,16 +1,27 @@
+import sys
 import unittest
+from pathlib import Path
+
 import jax.numpy as jnp
-from code.encoder import encode_qutrit
+
+CODE_DIR = Path(__file__).resolve().parents[1] / "code"
+sys.path.insert(0, str(CODE_DIR))
+
+from encoder import encode_qutrit
+
 
 class TestEncoder(unittest.TestCase):
-    def test_encoding_normalization(self):
-        qutrit_state = jnp.array([1+0j, 0+0j, 0+0j])
-        weights = {'1': 0.0, '2': 0.0, '3': 0.0, '4': 0.0,
-                   '5': 0.0, '6': 0.0, '7': 0.0, '8': 0.0}
-        qubit_state = encode_qutrit(qutrit_state, weights)
-        # With zero weights, U becomes identity so the projection should remain unchanged.
-        expected = qutrit_state[:2]
-        self.assertTrue(jnp.allclose(qubit_state[:2], expected))
+    def test_encoding_returns_state_and_unitary(self):
+        qutrit_state = jnp.array([1 + 0j, 0 + 0j, 0 + 0j])
+        weights = {str(i): 0.0 for i in range(1, 9)}
 
-if __name__ == '__main__':
+        encoded_state, encoder_unitary = encode_qutrit(qutrit_state, weights)
+
+        self.assertEqual(encoded_state.shape, (3,))
+        self.assertEqual(encoder_unitary.shape, (3, 3))
+        self.assertTrue(jnp.allclose(encoded_state, qutrit_state))
+        self.assertTrue(jnp.allclose(encoder_unitary, jnp.eye(3)))
+
+
+if __name__ == "__main__":
     unittest.main()
