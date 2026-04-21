@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-RESULTS_DIR = Path("../results")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+RESULTS_DIR = REPO_ROOT / "results"
 PLOTS_DIR = RESULTS_DIR / "plots"
 TRIAL1_RESULTS_PATH = RESULTS_DIR / "trial1" / "hyperparams_results.npy"
 TRIAL2_NOISE_DIR = RESULTS_DIR / "trial2_noise"

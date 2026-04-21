@@ -35,8 +35,8 @@ pip install --upgrade pip --user
 # Force install a compatible NumPy version before other dependencies
 pip install --user "numpy<2.0"
 
-# Locate the requirements.txt file (parent directory)
-REQ_FILE="$PBS_O_WORKDIR/requirements.txt"
+# Locate the requirements.txt file
+REQ_FILE="$PBS_O_WORKDIR/code/requirements.txt"
 
 # Check if requirements.txt exists before installing
 if [ -f "$REQ_FILE" ]; then
@@ -47,5 +47,5 @@ else
     exit 1
 fi
 
-# Run the main script
-python plot.py
+# Run the main training script
+python "$PBS_O_WORKDIR/code/main.py"

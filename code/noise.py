@@ -1,11 +1,17 @@
+import argparse
+from pathlib import Path
+
 import numpy as np
-import os
 import torch
 from generate_qutrit_state import save_states
 
-seed = 6
-np.random.seed(seed)
-torch.manual_seed(seed)
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_SEED = 6
+
+
+def p_to_filename(p: float) -> str:
+    return f"p_0_{int(round(p, 2) * 100):02d}.txt"
+
 
 def generate_random_almost_qubit_qutrit(overlap_val: float = 0.9) -> np.ndarray:
     """
@@ -24,23 +30,27 @@ def generate_random_almost_qubit_qutrit(overlap_val: float = 0.9) -> np.ndarray:
     state = np.array([a, sub[0], sub[1]])
     return state
 
-def main():
-    num_states = 2000
-    seed_dir = f"../noise/check/{seed}"
-    os.makedirs(seed_dir, exist_ok=True)
-    p_vals = np.arange(0.01, 1.01, 0.01)
+def main(seed: int = DEFAULT_SEED, num_states: int = 2000, output_root: Path | None = None,
+         p_min: float = 0.01, p_max: float = 1.00, p_step: float = 0.01):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    output_root = output_root or (REPO_ROOT / "noise" / "check")
+    seed_dir = output_root / str(seed)
+    seed_dir.mkdir(parents=True, exist_ok=True)
+    p_vals = np.arange(p_min, p_max + 0.5 * p_step, p_step)
     for p in p_vals:
         print(f"Generating for p = {p}")
         states = np.array([generate_random_almost_qubit_qutrit(1 - p) for _ in range(num_states)])
-        if p < 0.1:
-            filename = f"{seed_dir}/p_0_0{int(round(p, 2) * 100)}.txt"
-        elif p == 0.29:
-            filename = f"{seed_dir}/p_0_29.txt"
-        elif p == 0.58:
-            filename = f"{seed_dir}/p_0_58.txt"
-        else:
-            filename = f"{seed_dir}/p_0_{int(round(p, 2) * 100)}.txt"
+        filename = seed_dir / p_to_filename(p)
         save_states(filename, states)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Generate exact-overlap noisy qutrit datasets.")
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--num-states", type=int, default=2000)
+    parser.add_argument("--output-root", type=Path, default=None)
+    parser.add_argument("--p-min", type=float, default=0.01)
+    parser.add_argument("--p-max", type=float, default=1.00)
+    parser.add_argument("--p-step", type=float, default=0.01)
+    args = parser.parse_args()
+    main(args.seed, args.num_states, args.output_root, args.p_min, args.p_max, args.p_step)
